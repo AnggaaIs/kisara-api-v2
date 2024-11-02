@@ -1,7 +1,3 @@
-Tentu, berikut ini adalah isi lengkap dari `README.md` yang bisa langsung Anda copy dari sini:
-
----
-
 # Kisara API
 
 **Kisara API** is a RESTful API built with Go and the Fiber framework. This project includes automated configuration, environment variable management, and containerization with Docker to simplify development and deployment.
