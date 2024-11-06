@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"kisara/src/config"
 	"kisara/src/database"
-	"kisara/src/response"
+	"kisara/src/middleware"
 	"kisara/src/router"
 	"kisara/src/utils"
 	"os"
@@ -16,7 +16,6 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/cors"
-	"github.com/gofiber/fiber/v3/middleware/limiter"
 	"github.com/gofiber/fiber/v3/middleware/logger"
 	"gorm.io/gorm"
 )
@@ -58,19 +57,11 @@ func setupFiber() *fiber.App {
 	app.Use(cors.New(cors.Config{
 		AllowOrigins: []string{"*"},
 	}))
-	app.Use(limiter.New(limiter.Config{
-		Next: func(c fiber.Ctx) bool {
-			return c.IP() == "127.0.0.1"
-		},
-		Max:        100,
-		Expiration: 60 * time.Second,
-		LimitReached: func(c fiber.Ctx) error {
-			return c.Status(fiber.StatusTooManyRequests).JSON(response.GeneralResponse{
-				StatusCode: fiber.StatusTooManyRequests,
-				Name:       "Too Many Requests",
-				Message:    "You’ve reached the request limit. Kick back for a moment and come back later.",
-			})
-		},
+
+	//global rate limit
+	app.Use(middleware.RateLimitMiddleware(middleware.RateLimitConfig{
+		Max:      100,
+		Duration: 60,
 	}))
 
 	return app

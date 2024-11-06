@@ -18,6 +18,7 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 
 	SetupAuthRoutes(app, db)
 	SetupUserRoutes(app, db)
+	SetupMessageRoutes(app, db)
 
 	app.Use(func(c fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(response.NotFoundResponse{
