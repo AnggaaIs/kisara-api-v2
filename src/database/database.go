@@ -14,7 +14,14 @@ import (
 )
 
 func Connect() *gorm.DB {
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=Asia/Jakarta", config.AppConfig.DBHost, config.AppConfig.DBUser, config.AppConfig.DBPassword, config.AppConfig.DBName, config.AppConfig.DBPort)
+
+	sslmode := "disable"
+
+	if config.AppConfig.Env == "production" {
+		sslmode = "require"
+	}
+
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=%s TimeZone=Asia/Jakarta", config.AppConfig.DBHost, config.AppConfig.DBUser, config.AppConfig.DBPassword, config.AppConfig.DBName, config.AppConfig.DBPort, sslmode)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
@@ -54,7 +61,7 @@ func Connect() *gorm.DB {
 
 func pingDatabase(sqlDB *sql.DB) error {
 	if err := sqlDB.Ping(); err != nil {
-		return fmt.Errorf("gagal ping database: %w", err)
+		return fmt.Errorf("failed ping to database: %w", err)
 	}
 	return nil
 }
