@@ -23,6 +23,9 @@ type Config struct {
 
 	//key
 	JwtKey string
+
+	//env
+	Env string
 }
 
 var AppConfig *Config
@@ -49,5 +52,7 @@ func init() {
 		GoogleRedirectURL:  viper.GetString("GOOGLE_REDIRECT_URL"),
 
 		JwtKey: viper.GetString("JWT_KEY"),
+
+		Env: viper.GetString("ENV"),
 	}
 }
