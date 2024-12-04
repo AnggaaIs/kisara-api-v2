@@ -3,8 +3,11 @@ package utils
 import (
 	crand "crypto/rand"
 	"encoding/base64"
+	"kisara/src/models"
 	"math/rand"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 func GenerateRandomState(length int) (string, error) {
@@ -27,4 +30,17 @@ func GenerateLinkID(length int) string {
 		id[i] = letters[rand.Intn(len(letters))]
 	}
 	return string(id)
+}
+
+func GenerateUniqueLinkID(db *gorm.DB, length int) (string, error) {
+	for {
+		linkID := GenerateLinkID(length)
+		var count int64
+		if err := db.Model(&models.User{}).Where("link_id = ?", linkID).Count(&count).Error; err != nil {
+			return "", err
+		}
+		if count == 0 {
+			return linkID, nil
+		}
+	}
 }

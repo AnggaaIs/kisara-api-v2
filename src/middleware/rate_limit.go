@@ -21,11 +21,12 @@ func RateLimitMiddleware(config RateLimitConfig) fiber.Handler {
 		Max:        config.Max,
 		Expiration: time.Duration(config.Duration) * time.Second,
 		LimitReached: func(c fiber.Ctx) error {
-			return c.Status(fiber.StatusTooManyRequests).JSON(response.GeneralResponse{
-				StatusCode: fiber.StatusTooManyRequests,
-				Name:       "Too Many Requests",
-				Message:    "You’ve reached the request limit. Kick back for a moment and come back later.",
-			})
+			return c.Status(fiber.StatusTooManyRequests).JSON(response.Error(
+				fiber.StatusTooManyRequests,
+				"Too Many Requests",
+				"You’ve reached the request limit. Kick back for a moment and come back later.",
+				nil,
+			))
 		},
 	})
 }

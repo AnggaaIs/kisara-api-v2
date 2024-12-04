@@ -11,22 +11,24 @@ import (
 
 func AuthMiddleware(db *gorm.DB) fiber.Handler {
 	return func(c fiber.Ctx) error {
-		authorization := c.GetRespHeader("Authorization")
+		authorization := c.Get("Authorization")
 
 		if authorization == "" {
-			return c.Status(fiber.StatusUnauthorized).JSON(response.GeneralResponse{
-				StatusCode: fiber.StatusUnauthorized,
-				Name:       "Unauthorized",
-				Message:    "No token provided",
-			})
+			return c.Status(fiber.StatusUnauthorized).JSON(response.Error(
+				fiber.StatusUnauthorized,
+				"Unauthorized",
+				"No token provided",
+				nil,
+			))
 		}
 
 		if strings.Split(authorization, " ")[0] != "Bearer" {
-			return c.Status(fiber.StatusUnauthorized).JSON(response.GeneralResponse{
-				StatusCode: fiber.StatusUnauthorized,
-				Name:       "Unauthorized",
-				Message:    "Invalid token",
-			})
+			return c.Status(fiber.StatusUnauthorized).JSON(response.Error(
+				fiber.StatusUnauthorized,
+				"Unauthorized",
+				"Invalid token",
+				nil,
+			))
 		}
 
 		authorization = strings.Split(authorization, " ")[1]
@@ -34,11 +36,12 @@ func AuthMiddleware(db *gorm.DB) fiber.Handler {
 		// Check if the token is valid
 		token, err := utils.ValidateToken(authorization)
 		if err != nil {
-			return c.Status(fiber.StatusUnauthorized).JSON(response.GeneralResponse{
-				StatusCode: fiber.StatusUnauthorized,
-				Name:       "Unauthorized",
-				Message:    "Invalid token",
-			})
+			return c.Status(fiber.StatusUnauthorized).JSON(response.Error(
+				fiber.StatusUnauthorized,
+				"Unauthorized",
+				"Invalid token",
+				err,
+			))
 		}
 
 		c.Locals("token", token)

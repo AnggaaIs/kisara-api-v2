@@ -2,6 +2,7 @@
 package middleware
 
 import (
+	"kisara/src/response"
 	"kisara/src/utils"
 
 	"github.com/go-playground/validator/v10"
@@ -13,13 +14,6 @@ type ValidationError struct {
 	Message string `json:"message"`
 }
 
-type ErrorResponse struct {
-	StatusCode int               `json:"statusCode"`
-	Name       string            `json:"name"`
-	Message    string            `json:"message"`
-	Errors     []ValidationError `json:"errors,omitempty"`
-}
-
 func ValidateSchemas(querySchema interface{}, bodySchema interface{}) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		validate := validator.New()
@@ -28,11 +22,12 @@ func ValidateSchemas(querySchema interface{}, bodySchema interface{}) fiber.Hand
 			queryInstance := utils.CreateNew(querySchema)
 
 			if err := c.Bind().Query(queryInstance); err != nil {
-				return c.Status(fiber.StatusBadRequest).JSON(ErrorResponse{
-					StatusCode: fiber.StatusBadRequest,
-					Name:       "Bad Request",
-					Message:    "Invalid query parameters",
-				})
+				return c.Status(fiber.StatusBadRequest).JSON(response.Error(
+					fiber.StatusBadRequest,
+					"Bad Request",
+					"Invalid query parameters",
+					nil,
+				))
 			}
 
 			if err := validate.Struct(queryInstance); err != nil {
@@ -43,12 +38,12 @@ func ValidateSchemas(querySchema interface{}, bodySchema interface{}) fiber.Hand
 						Message: getErrorMsg(err),
 					})
 				}
-				return c.Status(fiber.StatusBadRequest).JSON(ErrorResponse{
-					StatusCode: fiber.StatusBadRequest,
-					Name:       "Bad Request",
-					Message:    "Query parameter validation failed",
-					Errors:     errors,
-				})
+				return c.Status(fiber.StatusBadRequest).JSON(response.ErrorWithDetails(
+					fiber.StatusBadRequest,
+					"Bad Request",
+					"Query parameter validation failed",
+					errors,
+				))
 			}
 
 			c.Locals("requestQuery", queryInstance)
@@ -58,11 +53,12 @@ func ValidateSchemas(querySchema interface{}, bodySchema interface{}) fiber.Hand
 			bodyInstance := utils.CreateNew(bodySchema)
 
 			if err := c.Bind().Body(bodyInstance); err != nil {
-				return c.Status(fiber.StatusBadRequest).JSON(ErrorResponse{
-					StatusCode: fiber.StatusBadRequest,
-					Name:       "Bad Request",
-					Message:    "Invalid request body",
-				})
+				return c.Status(fiber.StatusBadRequest).JSON(response.Error(
+					fiber.StatusBadRequest,
+					"Bad Request",
+					"Invalid request body",
+					nil,
+				))
 			}
 
 			if err := validate.Struct(bodyInstance); err != nil {
@@ -73,12 +69,12 @@ func ValidateSchemas(querySchema interface{}, bodySchema interface{}) fiber.Hand
 						Message: getErrorMsg(err),
 					})
 				}
-				return c.Status(fiber.StatusBadRequest).JSON(ErrorResponse{
-					StatusCode: fiber.StatusBadRequest,
-					Name:       "Bad Request",
-					Message:    "Request body validation failed",
-					Errors:     errors,
-				})
+				return c.Status(fiber.StatusBadRequest).JSON(response.ErrorWithDetails(
+					fiber.StatusBadRequest,
+					"Bad Request",
+					"Request body validation failed",
+					errors,
+				))
 			}
 
 			c.Locals("requestBody", bodyInstance)

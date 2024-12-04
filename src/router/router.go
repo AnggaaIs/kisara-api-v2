@@ -9,11 +9,12 @@ import (
 
 func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	app.Get("/", func(c fiber.Ctx) error {
-		return c.Status(fiber.StatusOK).JSON(response.GeneralResponse{
-			StatusCode: fiber.StatusOK,
-			Name:       "Sleep. Zzz...",
-			Message:    "Welcome to the Kisara API",
-		})
+		return c.Status(fiber.StatusOK).JSON(response.Success(
+			fiber.StatusOK,
+			"Success",
+			"Welcome to the Kisara API",
+			nil,
+		))
 	})
 
 	SetupAuthRoutes(app, db)
@@ -21,13 +22,11 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	SetupMessageRoutes(app, db)
 
 	app.Use(func(c fiber.Ctx) error {
-		return c.Status(fiber.StatusNotFound).JSON(response.NotFoundResponse{
-			GeneralResponse: response.GeneralResponse{
-				StatusCode: fiber.StatusNotFound,
-				Name:       "Not Found",
-				Message:    "Route not found",
-			},
-			Path: c.Path(),
-		})
+		return c.Status(fiber.StatusNotFound).JSON(response.Error(
+			fiber.StatusNotFound,
+			"Not Found",
+			"Route not found",
+			nil,
+		))
 	})
 }

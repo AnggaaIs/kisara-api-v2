@@ -9,6 +9,12 @@ import (
 	"gorm.io/gorm"
 )
 
+type UserResponse struct {
+	Name       string `json:"name"`
+	LinkID     string `json:"link_id"`
+	ProfileURL string `json:"profile_url"`
+}
+
 func HandleGetUser(db *gorm.DB) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		token := c.Locals("token").(*jwt.Token)
@@ -16,23 +22,26 @@ func HandleGetUser(db *gorm.DB) fiber.Handler {
 
 		email := claims["email"].(string)
 
-		var user models.User
-		result := db.Where("email = ?", email).Select("name", "link_id", "profile_url").First(&user)
+		var userResponse UserResponse
+		result := db.Model(&models.User{}).
+			Where("email = ?", email).
+			Select("name, link_id, profile_url").
+			Scan(&userResponse)
+
 		if result.Error != nil {
-			return c.Status(fiber.StatusNotFound).JSON(response.GeneralResponse{
-				StatusCode: fiber.StatusNotFound,
-				Name:       "Not Found",
-				Message:    "User not found",
-			})
+			return c.Status(fiber.StatusNotFound).JSON(response.Error(
+				fiber.StatusNotFound,
+				"Not Found",
+				"User not found",
+				result.Error,
+			))
 		}
 
-		return c.Status(fiber.StatusOK).JSON(response.DataResponse{
-			GeneralResponse: response.GeneralResponse{
-				StatusCode: fiber.StatusOK,
-				Name:       "Success",
-				Message:    "User found",
-			},
-			Data: user,
-		})
+		return c.Status(fiber.StatusOK).JSON(response.Success(
+			fiber.StatusOK,
+			"Success",
+			"User found",
+			userResponse,
+		))
 	}
 }
