@@ -147,7 +147,9 @@ func HandleGoogleCallback(db *gorm.DB) fiber.Handler {
 			}
 		} else if errDb == nil {
 			// Update existing user information
-			if err := db.Model(&models.User{}).Updates(models.User{
+			if err := db.Model(&models.User{}).
+			Where("email = ?", userInfo.Email).
+			Updates(models.User{
 				Name:       userInfo.Name,
 				ProfileURL: &userInfo.Picture,
 			}).Error; err != nil {
