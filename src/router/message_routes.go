@@ -16,6 +16,12 @@ func SetupMessageRoutes(app *fiber.App, db *gorm.DB) {
 	}))
 
 	message.Post("/:link_id", controller.HandleMessagePost(db), middleware.ValidateSchemas(nil, validation.MessageBodyPost{}))
-	message.Get("/:link_id", controller.HandleMessageGet(db))
+	message.Get("/:link_id", controller.HandleMessageGet(db), middleware.ValidateSchemas(validation.MessageBodyGet{}, nil))
 	message.Delete("/:link_id/:message_id", controller.HandleDeleteMessage(db), middleware.AuthMiddleware(db))
+
+	message.Get("/:link_id/:message_id", controller.HandleReplyMessageGet(db), middleware.ValidateSchemas(validation.MessageBodyGet{}, nil))
+	message.Post("/:link_id/:message_id", controller.HandleReplyMessagePost(db), middleware.AuthMiddleware(db), middleware.ValidateSchemas(nil, validation.MessageBodyPost{}))
+	message.Delete("/:link_id/:message_id/:reply_id", controller.HandleDeleteReplyMessage(db), middleware.AuthMiddleware(db))
+
+	message.Put("/:link_id/:message_id/like", controller.HandleLikeMessage(db), middleware.AuthMiddleware(db))
 }
