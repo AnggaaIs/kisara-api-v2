@@ -16,6 +16,7 @@ const (
 type User struct {
 	Email      string    `gorm:"primaryKey;unique;not null" json:"email"`
 	Name       string    `gorm:"unique;not null" json:"name"`
+	Nickname   string    `gorm:"null" json:"nickname"`
 	LinkID     string    `gorm:"unique;not null" json:"link_id"`
 	Role       Role      `gorm:"default:USER" json:"role"`
 	ProfileURL *string   `gorm:"null" json:"profile_url"`
