@@ -47,10 +47,8 @@ func HandleGoogleURL(db *gorm.DB) fiber.Handler {
 
 func HandleGoogleCallback(db *gorm.DB) fiber.Handler {
 	return func(c fiber.Ctx) error {
-		// Extract request body
 		query := c.Locals("requestBody").(*validation.AuthGoogleCallbackBody)
 
-		// Exchange code with token
 		token, err := config.GoogleOAuthConfig.Exchange(c.Context(), query.Code)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(
@@ -110,7 +108,7 @@ func HandleGoogleCallback(db *gorm.DB) fiber.Handler {
 			"picture":    userInfo.Picture,
 			"name":       userInfo.Name,
 			"link_id":    linkID,
-			"time_login": time.Now(),
+			"time_login": time.Now().Unix(),
 		}
 
 		jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -148,11 +146,11 @@ func HandleGoogleCallback(db *gorm.DB) fiber.Handler {
 		} else if errDb == nil {
 			// Update existing user information
 			if err := db.Model(&models.User{}).
-			Where("email = ?", userInfo.Email).
-			Updates(models.User{
-				Name:       userInfo.Name,
-				ProfileURL: &userInfo.Picture,
-			}).Error; err != nil {
+				Where("email = ?", userInfo.Email).
+				Updates(models.User{
+					Name:       userInfo.Name,
+					ProfileURL: &userInfo.Picture,
+				}).Error; err != nil {
 				return c.Status(fiber.StatusInternalServerError).JSON(
 					response.Error(
 						fiber.StatusInternalServerError,
