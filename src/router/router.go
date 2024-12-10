@@ -1,6 +1,7 @@
 package router
 
 import (
+	"kisara/src/controller"
 	"kisara/src/response"
 
 	"github.com/gofiber/fiber/v3"
@@ -16,6 +17,8 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 			nil,
 		))
 	})
+
+	app.Get("/stats", controller.HandleStats(db))
 
 	SetupAuthRoutes(app, db)
 	SetupUserRoutes(app, db)
