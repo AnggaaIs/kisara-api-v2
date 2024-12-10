@@ -48,6 +48,7 @@ func HandleMessagePost(db *gorm.DB) fiber.Handler {
 			map[string]interface{}{
 				"id":              comment.ID,
 				"message_content": comment.MessageContent,
+				"created_at":      comment.CreatedAt,
 			},
 		))
 	}
@@ -249,6 +250,7 @@ func HandleReplyMessagePost(db *gorm.DB) fiber.Handler {
 				"message_id":       messageID,
 				"reply_message_id": reply.ID,
 				"message_content":  content,
+				"created_at":       reply.CreatedAt,
 			},
 		))
 	}
