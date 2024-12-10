@@ -48,7 +48,7 @@ func AuthMiddleware(db *gorm.DB) fiber.Handler {
 
 		claims := token.Claims.(jwt.MapClaims)
 
-		timeToken := claims["time"].(float64)
+		timeToken := claims["time_login"].(float64)
 
 		// Check if the token is expired (7 days)
 		if timeToken+604800 < float64(time.Now().Unix()) {
